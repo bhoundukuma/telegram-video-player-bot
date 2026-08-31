@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Video Player</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: #111;
+      color: white;
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .player-container {
+      width: 95%;
+      max-width: 900px;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    video {
+      width: 100%;
+      max-height: 80vh;
+      background: black;
+      border-radius: 10px;
+    }
+
+    .error {
+      text-align: center;
+      color: #ff6b6b;
+      margin-top: 15px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="player-container">
+
+    <h2>🎬 Video Player</h2>
+
+    <video id="videoPlayer" controls playsinline>
+      Your browser does not support HTML5 video.
+    </video>
+
+    <div id="error" class="error"></div>
+
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const videoUrl = params.get("video");
+
+    const player = document.getElementById("videoPlayer");
+    const error = document.getElementById("error");
+
+    if (!videoUrl) {
+      error.textContent = "❌ No video URL provided.";
+    } else {
+      player.src = videoUrl;
+
+      player.addEventListener("error", () => {
+        error.textContent =
+          "❌ This video cannot be played. Check the video URL and format.";
+      });
+    }
+  </script>
+
+</body>
+</html>
