@@ -1,26 +1,10 @@
 require("dotenv").config();
 
 const express = require("express");
-const path = require("path");
 const { Telegraf, Markup } = require("telegraf");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-
-// =========================
-// Express Web Server
-// =========================
-
-app.use(express.static(path.join(__dirname, "public")));
-
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
-});
-
-// Health check for Render
-app.get("/health", (req, res) => {
-  res.status(200).send("OK");
-});
 
 // =========================
 // Telegram Bot
@@ -31,34 +15,33 @@ if (!process.env.BOT_TOKEN) {
   process.exit(1);
 }
 
-if (!process.env.PLAYER_URL) {
-  console.error("❌ PLAYER_URL is missing!");
-  process.exit(1);
-}
-
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
 bot.start((ctx) => {
   ctx.reply(
     "🎬 Welcome to Video Player Bot!\n\n" +
-      "Send me a direct video URL and I'll create a Play Online button.",
+      "Send me a DiskWala video link and I'll create a button to watch it.",
   );
 });
 
 bot.on("text", async (ctx) => {
   const videoUrl = ctx.message.text.trim();
 
+  // Check URL
   try {
-    new URL(videoUrl);
+    const url = new URL(videoUrl);
+
+    if (!url.protocol.startsWith("http")) {
+      throw new Error("Invalid protocol");
+    }
   } catch {
     return ctx.reply("❌ Please send a valid video URL.");
   }
 
-  const playerUrl = `${process.env.PLAYER_URL}/?video=${encodeURIComponent(videoUrl)}`;
-
+  // Open the original video/page URL directly
   await ctx.reply(
-    "🎬 Video Ready!\n\n" + "Tap the button below to watch:",
-    Markup.inlineKeyboard([[Markup.button.url("▶️ Play Online", playerUrl)]]),
+    "🎬 Video Ready!\n\n" + "Tap the button below to watch the video:",
+    Markup.inlineKeyboard([[Markup.button.url("▶️ Watch Video", videoUrl)]]),
   );
 });
 
@@ -67,8 +50,16 @@ bot.catch((err) => {
 });
 
 // =========================
-// Start Server + Bot
+// Render Web Server
 // =========================
+
+app.get("/", (req, res) => {
+  res.send("🤖 Telegram Video Player Bot is running!");
+});
+
+app.get("/health", (req, res) => {
+  res.status(200).send("OK");
+});
 
 app.listen(PORT, "0.0.0.0", async () => {
   console.log(`🌐 Server running on port ${PORT}`);
