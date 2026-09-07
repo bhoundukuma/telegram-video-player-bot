@@ -55,3 +55,6 @@ bot.catch((err) => {
 bot.launch();
 
 console.log("🤖 Telegram bot is running...");
+
+process.once("SIGINT", () => bot.stop("SIGINT"));
+process.once("SIGTERM", () => bot.stop("SIGTERM"));
